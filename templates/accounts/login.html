@@ -1,39 +1,79 @@
 {% extends "accounts/auth_base.html" %}
 
-{% block title %}Login - Snoozr{% endblock %}
+{% block title %}Sign In - Snoozr Starry Night{% endblock %}
 
 {% block auth_content %}
 <div class="text-center mb-4">
-    <i class="bi bi-moon-stars-fill brand-icon"></i>
-    <h2 class="mt-2 fw-bold">Welcome to Snoozr</h2>
-    <p class="text-muted">Sign in to track your sleep</p>
+    <div class="auth-brand-badge">
+        <i class="bi bi-moon-stars-fill"></i>
+        <span>SNOOZR SLEEP SANCTUARY</span>
+    </div>
+    <h2 class="fw-bold mb-1 text-gold-gradient">Welcome Back</h2>
+    <p class="text-muted small">Enter the celestial realm of restful sleep</p>
 </div>
 
-<form method="POST" action="{% url 'accounts:login' %}">
+<!-- Quick Demo Login Hint / Autofill Pill -->
+<div class="p-2 mb-3 rounded-3 text-center" style="background: rgba(255, 209, 102, 0.08); border: 1px dashed rgba(255, 209, 102, 0.3);">
+    <span class="small text-secondary">Quick test: </span>
+    <button type="button" class="btn btn-sm py-0 px-2 text-warning fw-semibold" style="font-size: 0.78rem; text-decoration: underline;" onclick="fillDemo('admin', 'admin123')">
+        Fill Admin
+    </button>
+</div>
+
+<form method="POST" action="{% url 'accounts:login' %}" id="login-form">
     {% csrf_token %}
 
-    <div class="mb-3">
-        <label for="username" class="form-label fw-semibold">Username</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-person"></i></span>
-            <input type="text" name="username" id="username" class="form-control" placeholder="Enter your username" required autofocus>
+    <div class="starry-input-group">
+        <label for="username" class="form-label small fw-semibold text-secondary mb-1">Username</label>
+        <div class="position-relative">
+            <i class="bi bi-person-fill input-icon"></i>
+            <input type="text" name="username" id="username" class="form-control starry-input" placeholder="Enter your username" required autofocus autocomplete="username">
         </div>
     </div>
 
-    <div class="mb-4">
-        <label for="password" class="form-label fw-semibold">Password</label>
-        <div class="input-group">
-            <span class="input-group-text"><i class="bi bi-lock"></i></span>
-            <input type="password" name="password" id="password" class="form-control" placeholder="Enter your password" required>
+    <div class="starry-input-group mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label for="password" class="form-label small fw-semibold text-secondary mb-0">Password</label>
+            <span class="text-muted small" style="cursor: pointer; font-size: 0.8rem;" onclick="togglePasswordVisibility('password', this)">
+                <i class="bi bi-eye"></i> Show
+            </span>
+        </div>
+        <div class="position-relative">
+            <i class="bi bi-key-fill input-icon"></i>
+            <input type="password" name="password" id="password" class="form-control starry-input" placeholder="Enter your password" required autocomplete="current-password">
         </div>
     </div>
 
-    <button type="submit" class="btn btn-snoozr mb-3">
-        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+    <button type="submit" class="btn btn-starry w-100 py-3 mb-4">
+        <i class="bi bi-stars"></i>
+        <span>Begin Journey &bull; Sign In</span>
     </button>
 </form>
 
-<div class="text-center">
-    <p class="mb-0">Don't have an account? <a href="{% url 'accounts:register' %}" class="fw-semibold">Create one</a></p>
+<div class="text-center pt-2" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <p class="mb-0 text-secondary small">
+        New to Snoozr? 
+        <a href="{% url 'accounts:register' %}" class="fw-bold text-decoration-none" style="color: var(--star-gold);">
+            Create an Account <i class="bi bi-arrow-right-short"></i>
+        </a>
+    </p>
 </div>
+
+<script>
+    function togglePasswordVisibility(inputId, trigger) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            trigger.innerHTML = '<i class="bi bi-eye-slash"></i> Hide';
+        } else {
+            input.type = 'password';
+            trigger.innerHTML = '<i class="bi bi-eye"></i> Show';
+        }
+    }
+
+    function fillDemo(user, pass) {
+        document.getElementById('username').value = user;
+        document.getElementById('password').value = pass;
+    }
+</script>
 {% endblock %}

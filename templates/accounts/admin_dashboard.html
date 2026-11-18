@@ -1,132 +1,141 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard - Snoozr{% endblock %}
+{% block title %}Admin Observatory - Snoozr Starry Night{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="text-center py-3">
-                <i class="bi bi-moon-stars-fill text-white" style="font-size: 2rem;"></i>
-                <h5 class="text-white mt-2">Snoozr Admin</h5>
-                <span class="badge bg-danger">Admin</span>
+<div class="container">
+    <!-- Admin Hero Header -->
+    <div class="starry-glass-card p-4 p-md-5 mb-4 position-relative overflow-hidden" style="border-top: 3px solid #ff4d6d;">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill" style="background: rgba(230, 57, 70, 0.2); border: 1px solid rgba(255, 77, 109, 0.4);">
+                    <i class="bi bi-shield-lock-fill text-danger"></i>
+                    <span class="small fw-semibold text-danger">ADMINISTRATIVE OBSERVATORY</span>
+                </div>
+                <h1 class="display-6 fw-bold mb-1">
+                    System Control &bull; <span class="text-gold-gradient">{{ user.get_full_name|default:user.username }}</span>
+                </h1>
+                <p class="text-secondary mb-0 small">
+                    Oversee all cosmic accounts, security roles, and user registrations across the Snoozr platform.
+                </p>
             </div>
-            <hr class="text-white-50">
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link active" href="{% url 'accounts:admin_dashboard' %}">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'accounts:profile' %}">
-                        <i class="bi bi-person"></i> My Profile
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'admin:index' %}">
-                        <i class="bi bi-gear"></i> Admin Panel
-                    </a>
-                </li>
-                <li class="nav-item mt-3">
-                    <a class="nav-link text-danger" href="{% url 'accounts:logout' %}">
-                        <i class="bi bi-box-arrow-right"></i> Logout
-                    </a>
-                </li>
-            </ul>
-        </nav>
+            <div class="d-flex gap-2">
+                <a href="{% url 'admin:index' %}" target="_blank" class="btn btn-starry-outline">
+                    <i class="bi bi-gear-fill"></i> Django Admin Site
+                </a>
+                <a href="{% url 'accounts:profile' %}" class="btn btn-starry">
+                    <i class="bi bi-person-circle"></i> My Account
+                </a>
+            </div>
+        </div>
+    </div>
 
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 class="fw-bold">Admin Dashboard</h2>
-                    <p class="text-muted">Welcome back, {{ user.get_full_name|default:user.username }}!</p>
-                </div>
-                <span class="badge bg-danger fs-6"><i class="bi bi-shield-lock me-1"></i>Admin</span>
+    <!-- Metrics Stat Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="starry-stat-card h-100">
+                <i class="bi bi-people-fill stat-icon text-warning"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Total Accounts</div>
+                <h2 class="display-5 fw-bold mb-1 text-gold-gradient">{{ total_users }}</h2>
+                <div class="small text-secondary">Registered slumberers in database</div>
             </div>
+        </div>
 
-            <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-md-4 mb-3">
-                    <div class="stat-card purple">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1 opacity-75">Total Users</h6>
-                                <h2 class="mb-0 fw-bold">{{ total_users }}</h2>
-                            </div>
-                            <i class="bi bi-people-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="stat-card blue">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1 opacity-75">Members</h6>
-                                <h2 class="mb-0 fw-bold">{{ total_members }}</h2>
-                            </div>
-                            <i class="bi bi-person-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <div class="stat-card pink">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1 opacity-75">Admins</h6>
-                                <h2 class="mb-0 fw-bold">{{ total_admins }}</h2>
-                            </div>
-                            <i class="bi bi-shield-fill" style="font-size: 2.5rem; opacity: 0.5;"></i>
-                        </div>
-                    </div>
-                </div>
+        <div class="col-md-4">
+            <div class="starry-stat-card h-100">
+                <i class="bi bi-person-hearts stat-icon text-info"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Active Members</div>
+                <h2 class="display-5 fw-bold mb-1 text-cyan-gradient">{{ total_members }}</h2>
+                <div class="small text-secondary">Standard users with personal dashboards</div>
             </div>
+        </div>
 
-            <!-- Recent Users Table -->
-            <div class="card">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-clock-history me-2"></i>Recent Users</h5>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Username</th>
-                                    <th>Email</th>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th>Joined</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for u in recent_users %}
-                                <tr>
-                                    <td>{{ u.username }}</td>
-                                    <td>{{ u.email }}</td>
-                                    <td>{{ u.get_full_name|default:"—" }}</td>
-                                    <td>
-                                        {% if u.role == 'admin' %}
-                                        <span class="badge bg-danger">Admin</span>
-                                        {% else %}
-                                        <span class="badge bg-primary">Member</span>
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ u.date_joined|date:"M d, Y" }}</td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">No users yet.</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="col-md-4">
+            <div class="starry-stat-card h-100">
+                <i class="bi bi-shield-shaded stat-icon text-danger"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Administrators</div>
+                <h2 class="display-5 fw-bold mb-1 text-danger">{{ total_admins }}</h2>
+                <div class="small text-secondary">Full system access privileges</div>
             </div>
-        </main>
+        </div>
+    </div>
+
+    <!-- Registered Users Observatory Table -->
+    <div class="starry-glass-card p-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+            <div>
+                <h4 class="fw-bold mb-1"><i class="bi bi-table text-warning me-2"></i>User Registry</h4>
+                <p class="text-secondary small mb-0">Showing latest registered accounts and their assigned roles</p>
+            </div>
+            <div>
+                <input type="text" id="user-filter-input" class="form-control starry-input" placeholder="Quick filter users..." style="max-width: 260px;" onkeyup="filterUsers()">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="starry-table" id="users-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Full Name</th>
+                        <th>Role</th>
+                        <th>Joined Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in recent_users %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                {% if u.profile_photo %}
+                                <img src="{{ u.profile_photo.url }}" class="starry-avatar-sm" alt="Pic">
+                                {% else %}
+                                <div class="starry-avatar-sm d-flex align-items-center justify-content-center" style="background: rgba(255, 209, 102, 0.15); color: var(--star-gold); font-size: 0.85rem;">
+                                    <i class="bi bi-person"></i>
+                                </div>
+                                {% endif %}
+                                <span class="fw-bold text-white">{{ u.username }}</span>
+                            </div>
+                        </td>
+                        <td class="text-secondary small">{{ u.email }}</td>
+                        <td class="text-white">{{ u.get_full_name|default:"—" }}</td>
+                        <td>
+                            {% if u.role == 'admin' %}
+                            <span class="badge-role-admin">Admin</span>
+                            {% else %}
+                            <span class="badge-role-member">Member</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-secondary small">{{ u.date_joined|date:"M d, Y H:i" }}</td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="badge bg-success bg-opacity-25 text-success border border-success border-opacity-50 px-2 py-1 rounded-pill small">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger bg-opacity-25 text-danger border border-danger border-opacity-50 px-2 py-1 rounded-pill small">Inactive</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted">No accounts registered yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
+
+<script>
+    function filterUsers() {
+        const input = document.getElementById('user-filter-input').value.toLowerCase();
+        const rows = document.querySelectorAll('#users-table tbody tr');
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(input) ? '' : 'none';
+        });
+    }
+</script>
 {% endblock %}

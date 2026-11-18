@@ -1,0 +1,466 @@
+/* ==========================================================================
+   Snoozr - Starry Night Celestial UI Design System
+   Inspired by Vincent van Gogh's Masterpiece "The Starry Night"
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+
+:root {
+    /* Celestial Palette */
+    --cosmos-deep: #060919;
+    --cosmos-dark: #0a0f29;
+    --cosmos-midnight: #0f1738;
+    --cosmos-indigo: #1a2253;
+    
+    /* Starry Night Signature Gold & Amber */
+    --star-gold: #ffd166;
+    --star-gold-glow: rgba(255, 209, 102, 0.45);
+    --star-amber: #ffaa00;
+    --star-amber-glow: rgba(255, 170, 0, 0.35);
+
+    /* Cosmic Ultramarine & Ethereal Cyan */
+    --star-cyan: #70d6ff;
+    --star-cyan-glow: rgba(112, 214, 255, 0.4);
+    --star-violet: #845ec2;
+    --star-cobalt: #2c73d2;
+    
+    /* Starry Glass Surfaces */
+    --glass-bg: rgba(12, 19, 48, 0.65);
+    --glass-bg-hover: rgba(18, 28, 68, 0.75);
+    --glass-border: rgba(255, 215, 120, 0.16);
+    --glass-border-focus: rgba(255, 215, 120, 0.55);
+    --glass-highlight: rgba(255, 255, 255, 0.08);
+
+    /* Text */
+    --text-primary: #f8faff;
+    --text-secondary: #a2b0d7;
+    --text-muted: #6f7fba;
+
+    /* Transitions & Shadows */
+    --transition-smooth: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    --shadow-celestial: 0 20px 50px -10px rgba(0, 0, 0, 0.55), 0 0 35px -5px rgba(255, 209, 102, 0.12);
+    --shadow-glow-gold: 0 0 25px rgba(255, 209, 102, 0.35);
+    --shadow-glow-cyan: 0 0 25px rgba(112, 214, 255, 0.35);
+}
+
+/* Base Reset & Cosmos Canvas */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-primary);
+    background-color: var(--cosmos-deep);
+    overflow-x: hidden;
+    position: relative;
+}
+
+/* 3D Three.js Canvas Container */
+#starry-canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* Cosmic Grain / Vignette Overlay */
+.cosmic-vignette {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(circle at 75% 20%, transparent 35%, rgba(6, 9, 25, 0.75) 90%),
+                radial-gradient(circle at 20% 80%, rgba(26, 34, 83, 0.3) 0%, transparent 60%);
+}
+
+/* App Main Wrapper */
+.app-content-wrapper {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ==========================================================================
+   Celestial Glassmorphism Card System
+   ========================================================================== */
+.starry-glass-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    box-shadow: var(--shadow-celestial);
+    transition: var(--transition-smooth);
+    position: relative;
+    overflow: hidden;
+}
+
+.starry-glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--star-gold) 35%, 
+        var(--star-cyan) 70%, 
+        transparent 100%);
+    opacity: 0.85;
+}
+
+.starry-glass-card:hover {
+    border-color: var(--glass-border-focus);
+    transform: translateY(-4px);
+    box-shadow: 0 25px 60px -10px rgba(0, 0, 0, 0.65), 0 0 40px -5px rgba(255, 209, 102, 0.2);
+}
+
+/* Header & Typography */
+h1, h2, h3, h4, h5, h6, .brand-title {
+    font-family: 'Outfit', sans-serif;
+    color: var(--text-primary);
+    letter-spacing: -0.02em;
+}
+
+.text-gold-gradient {
+    background: linear-gradient(135deg, #fff 10%, var(--star-gold) 60%, var(--star-amber) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.text-cyan-gradient {
+    background: linear-gradient(135deg, #fff 15%, var(--star-cyan) 80%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ==========================================================================
+   Buttons with Cosmic Energy
+   ========================================================================== */
+.btn-starry {
+    background: linear-gradient(135deg, #ffa000 0%, #ffd166 50%, #ffbe0b 100%);
+    color: #080d24 !important;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 12px 28px;
+    border: none;
+    border-radius: 30px;
+    box-shadow: 0 4px 20px rgba(255, 209, 102, 0.4);
+    transition: var(--transition-smooth);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-starry:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 30px rgba(255, 209, 102, 0.65);
+    color: #000 !important;
+}
+
+.btn-starry:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-starry-outline {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--star-gold) !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 10px 24px;
+    border: 1px solid var(--glass-border);
+    border-radius: 30px;
+    backdrop-filter: blur(12px);
+    transition: var(--transition-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-starry-outline:hover {
+    background: rgba(255, 209, 102, 0.12);
+    border-color: var(--star-gold);
+    color: #ffffff !important;
+    box-shadow: var(--shadow-glow-gold);
+}
+
+.btn-starry-danger {
+    background: linear-gradient(135deg, #e63946 0%, #ff4d6d 100%);
+    color: white !important;
+    border-radius: 30px;
+    padding: 10px 24px;
+    border: none;
+    font-weight: 600;
+    transition: var(--transition-smooth);
+}
+
+.btn-starry-danger:hover {
+    box-shadow: 0 4px 20px rgba(230, 57, 70, 0.5);
+    transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Form Controls with Starlight Focus
+   ========================================================================== */
+.starry-input-group {
+    position: relative;
+    margin-bottom: 1.25rem;
+}
+
+.starry-input-group .input-icon {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    transition: var(--transition-smooth);
+    z-index: 3;
+}
+
+.form-control.starry-input,
+.starry-input {
+    background: rgba(10, 16, 42, 0.6) !important;
+    border: 1px solid rgba(162, 176, 215, 0.2) !important;
+    color: var(--text-primary) !important;
+    border-radius: 14px !important;
+    padding: 12px 16px 12px 46px !important;
+    font-size: 0.95rem !important;
+    transition: var(--transition-smooth) !important;
+}
+
+.form-control.starry-input:focus,
+.starry-input:focus {
+    background: rgba(14, 22, 58, 0.85) !important;
+    border-color: var(--star-gold) !important;
+    box-shadow: 0 0 20px rgba(255, 209, 102, 0.28) !important;
+    outline: none !important;
+}
+
+.form-control.starry-input::placeholder {
+    color: var(--text-muted) !important;
+}
+
+.starry-input-group:focus-within .input-icon {
+    color: var(--star-gold);
+}
+
+/* ==========================================================================
+   Navigation Bar
+   ========================================================================== */
+.starry-navbar {
+    background: rgba(8, 13, 35, 0.72) !important;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 14px 0;
+    transition: var(--transition-smooth);
+}
+
+.starry-navbar .navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #fff !important;
+}
+
+.starry-navbar .brand-moon-icon {
+    font-size: 1.8rem;
+    color: var(--star-gold);
+    filter: drop-shadow(0 0 12px rgba(255, 209, 102, 0.7));
+    animation: moonFloat 4s ease-in-out infinite alternate;
+}
+
+@keyframes moonFloat {
+    0% { transform: translateY(0px) rotate(0deg); }
+    100% { transform: translateY(-4px) rotate(6deg); }
+}
+
+/* Ambient Audio Pill */
+.ambient-sound-pill {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: var(--transition-smooth);
+}
+
+.ambient-sound-pill:hover, .ambient-sound-pill.active {
+    background: rgba(255, 209, 102, 0.15);
+    border-color: var(--star-gold);
+    color: var(--star-gold);
+    box-shadow: 0 0 15px rgba(255, 209, 102, 0.3);
+}
+
+/* ==========================================================================
+   Badges & Micro-tags
+   ========================================================================== */
+.badge-role-admin {
+    background: linear-gradient(135deg, rgba(230, 57, 70, 0.25), rgba(255, 77, 109, 0.35));
+    border: 1px solid rgba(255, 77, 109, 0.5);
+    color: #ff758f !important;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 0 15px rgba(230, 57, 70, 0.25);
+}
+
+.badge-role-member {
+    background: linear-gradient(135deg, rgba(112, 214, 255, 0.2), rgba(44, 115, 210, 0.35));
+    border: 1px solid rgba(112, 214, 255, 0.5);
+    color: #a0e8ff !important;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    box-shadow: 0 0 15px rgba(112, 214, 255, 0.25);
+}
+
+/* Alerts */
+.alert.starry-alert {
+    background: rgba(14, 22, 54, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-radius: 16px;
+    padding: 14px 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+.alert-danger.starry-alert {
+    border-color: rgba(230, 57, 70, 0.5);
+    border-left: 4px solid #e63946;
+}
+
+.alert-success.starry-alert {
+    border-color: rgba(74, 222, 128, 0.5);
+    border-left: 4px solid #4ade80;
+}
+
+.alert-info.starry-alert {
+    border-color: rgba(112, 214, 255, 0.5);
+    border-left: 4px solid var(--star-cyan);
+}
+
+/* Stats Cards */
+.starry-stat-card {
+    background: linear-gradient(135deg, rgba(15, 23, 62, 0.7) 0%, rgba(22, 34, 88, 0.5) 100%);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: var(--transition-smooth);
+}
+
+.starry-stat-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--star-gold);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 209, 102, 0.2);
+}
+
+.starry-stat-card .stat-icon {
+    font-size: 2.4rem;
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    opacity: 0.35;
+    transition: var(--transition-smooth);
+}
+
+.starry-stat-card:hover .stat-icon {
+    opacity: 0.85;
+    transform: scale(1.1) rotate(5deg);
+}
+
+/* Profile Photo */
+.starry-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--star-gold);
+    box-shadow: 0 0 25px rgba(255, 209, 102, 0.45);
+}
+
+.starry-avatar-sm {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--star-gold);
+}
+
+/* Tables */
+.starry-table {
+    width: 100%;
+    color: var(--text-primary);
+    border-collapse: separate;
+    border-spacing: 0 8px;
+}
+
+.starry-table thead th {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 12px 16px;
+}
+
+.starry-table tbody tr {
+    background: rgba(14, 22, 54, 0.6);
+    backdrop-filter: blur(8px);
+    transition: var(--transition-smooth);
+}
+
+.starry-table tbody tr:hover {
+    background: rgba(22, 34, 80, 0.85);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.starry-table tbody td {
+    padding: 14px 16px;
+    border: none;
+    vertical-align: middle;
+}
+
+.starry-table tbody tr td:first-child {
+    border-radius: 12px 0 0 12px;
+}
+
+.starry-table tbody tr td:last-child {
+    border-radius: 0 12px 12px 0;
+}

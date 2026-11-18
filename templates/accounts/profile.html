@@ -1,70 +1,88 @@
 {% extends "base.html" %}
 
-{% block title %}My Profile - Snoozr{% endblock %}
+{% block title %}My Sleep Profile - Snoozr Starry Night{% endblock %}
 
 {% block content %}
-<div class="container py-5">
+<div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-body p-5">
-                    <div class="text-center mb-4">
+        <div class="col-lg-8">
+            <div class="starry-glass-card p-4 p-md-5">
+                <!-- Profile Header -->
+                <div class="text-center mb-4 pb-3" style="border-bottom: 1px solid rgba(255, 255, 255, 0.08);">
+                    <div class="position-relative d-inline-block mb-3">
                         {% if user.profile_photo %}
-                        <img src="{{ user.profile_photo.url }}" class="profile-photo mb-3" alt="Profile Photo">
+                        <img src="{{ user.profile_photo.url }}" class="starry-avatar" alt="Profile Photo">
                         {% else %}
-                        <div class="profile-photo mx-auto d-flex align-items-center justify-content-center bg-light mb-3">
-                            <i class="bi bi-person-fill" style="font-size: 3rem; color: #8f94fb;"></i>
-                        </div>
-                        {% endif %}
-                        <h3 class="fw-bold">{{ user.get_full_name|default:user.username }}</h3>
-                        <span class="badge {% if user.role == 'admin' %}bg-danger{% else %}bg-primary{% endif %} fs-6">
-                            {{ user.get_role_display }}
-                        </span>
-                    </div>
-
-                    <hr>
-
-                    <div class="row mt-4">
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Username</label>
-                            <p class="fw-semibold">{{ user.username }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Email</label>
-                            <p class="fw-semibold">{{ user.email }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">First Name</label>
-                            <p class="fw-semibold">{{ user.first_name|default:"Not set" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Last Name</label>
-                            <p class="fw-semibold">{{ user.last_name|default:"Not set" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Contact Number</label>
-                            <p class="fw-semibold">{{ user.contact_number|default:"Not set" }}</p>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="text-muted small">Member Since</label>
-                            <p class="fw-semibold">{{ user.date_joined|date:"F d, Y" }}</p>
-                        </div>
-                        {% if user.bio %}
-                        <div class="col-12 mb-3">
-                            <label class="text-muted small">Bio</label>
-                            <p class="fw-semibold">{{ user.bio }}</p>
+                        <div class="starry-avatar mx-auto d-flex align-items-center justify-content-center" style="background: rgba(255, 209, 102, 0.15); font-size: 3.5rem; color: var(--star-gold);">
+                            <i class="bi bi-person-fill"></i>
                         </div>
                         {% endif %}
                     </div>
 
-                    <div class="text-center mt-3">
-                        <a href="{% url 'accounts:profile_edit' %}" class="btn btn-snoozr">
-                            <i class="bi bi-pencil-square me-2"></i>Edit Profile
-                        </a>
-                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary ms-2" style="border-radius: 25px; padding: 10px 30px;">
-                            <i class="bi bi-arrow-left me-2"></i>Back to Dashboard
-                        </a>
+                    <h2 class="fw-bold mb-1 text-gold-gradient">{{ user.get_full_name|default:user.username }}</h2>
+                    <div class="text-secondary small mb-2">@{{ user.username }} &bull; {{ user.email }}</div>
+                    
+                    {% if user.role == 'admin' %}
+                    <span class="badge-role-admin"><i class="bi bi-shield-fill-check me-1"></i> System Administrator</span>
+                    {% else %}
+                    <span class="badge-role-member"><i class="bi bi-moon-stars-fill me-1"></i> Slumber Member</span>
+                    {% endif %}
+                </div>
+
+                <!-- Profile Data Grid -->
+                <div class="row g-3 mb-4">
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Username</div>
+                            <div class="fw-bold text-white">{{ user.username }}</div>
+                        </div>
                     </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Email Address</div>
+                            <div class="fw-bold text-white">{{ user.email }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">First Name</div>
+                            <div class="fw-bold text-white">{{ user.first_name|default:"Not specified" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Last Name</div>
+                            <div class="fw-bold text-white">{{ user.last_name|default:"Not specified" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Contact Number</div>
+                            <div class="fw-bold text-white">{{ user.contact_number|default:"Not provided" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Cosmic Member Since</div>
+                            <div class="fw-bold text-white">{{ user.date_joined|date:"F d, Y" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Sleep Philosophy & Bio</div>
+                            <div class="text-white">{{ user.bio|default:"No bio recorded under the stars yet." }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-starry">
+                        <i class="bi bi-pencil-square"></i> Edit Profile Details
+                    </a>
+                    <a href="{% url 'accounts:dashboard' %}" class="btn btn-starry-outline">
+                        <i class="bi bi-arrow-left"></i> Return to Dashboard
+                    </a>
                 </div>
             </div>
         </div>

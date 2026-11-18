@@ -1,72 +1,153 @@
 {% extends "accounts/auth_base.html" %}
 
-{% block title %}Register - Snoozr{% endblock %}
+{% block title %}Create Account - Snoozr Starry Night{% endblock %}
 
 {% block auth_content %}
 <div class="text-center mb-4">
-    <i class="bi bi-moon-stars-fill brand-icon"></i>
-    <h2 class="mt-2 fw-bold">Create Account</h2>
-    <p class="text-muted">Start tracking your sleep today</p>
+    <div class="auth-brand-badge">
+        <i class="bi bi-stars"></i>
+        <span>BEGIN YOUR SLEEP ODYSSEY</span>
+    </div>
+    <h2 class="fw-bold mb-1 text-gold-gradient">Create Account</h2>
+    <p class="text-muted small">Join Snoozr and synchronize with the stars</p>
 </div>
 
-<form method="POST" action="{% url 'accounts:register' %}">
+<form method="POST" action="{% url 'accounts:register' %}" id="register-form">
     {% csrf_token %}
 
-    <div class="row">
-        <div class="col-6 mb-3">
-            <label for="{{ form.first_name.id_for_label }}" class="form-label fw-semibold">First Name</label>
-            {{ form.first_name }}
-            {% if form.first_name.errors %}
-            <div class="text-danger small mt-1">{{ form.first_name.errors.0 }}</div>
-            {% endif %}
+    <div class="row g-2 mb-1">
+        <div class="col-6">
+            <div class="starry-input-group">
+                <label class="form-label small fw-semibold text-secondary mb-1">First Name</label>
+                <div class="position-relative">
+                    <i class="bi bi-person input-icon"></i>
+                    {{ form.first_name }}
+                </div>
+                {% if form.first_name.errors %}
+                <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.first_name.errors.0 }}</div>
+                {% endif %}
+            </div>
         </div>
-        <div class="col-6 mb-3">
-            <label for="{{ form.last_name.id_for_label }}" class="form-label fw-semibold">Last Name</label>
-            {{ form.last_name }}
-            {% if form.last_name.errors %}
-            <div class="text-danger small mt-1">{{ form.last_name.errors.0 }}</div>
-            {% endif %}
+        <div class="col-6">
+            <div class="starry-input-group">
+                <label class="form-label small fw-semibold text-secondary mb-1">Last Name</label>
+                <div class="position-relative">
+                    <i class="bi bi-person input-icon"></i>
+                    {{ form.last_name }}
+                </div>
+                {% if form.last_name.errors %}
+                <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.last_name.errors.0 }}</div>
+                {% endif %}
+            </div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">Username</label>
-        {{ form.username }}
+    <div class="starry-input-group">
+        <label class="form-label small fw-semibold text-secondary mb-1">Username</label>
+        <div class="position-relative">
+            <i class="bi bi-at input-icon"></i>
+            {{ form.username }}
+        </div>
         {% if form.username.errors %}
-        <div class="text-danger small mt-1">{{ form.username.errors.0 }}</div>
+        <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.username.errors.0 }}</div>
         {% endif %}
     </div>
 
-    <div class="mb-3">
-        <label for="{{ form.email.id_for_label }}" class="form-label fw-semibold">Email Address</label>
-        {{ form.email }}
+    <div class="starry-input-group">
+        <label class="form-label small fw-semibold text-secondary mb-1">Email Address</label>
+        <div class="position-relative">
+            <i class="bi bi-envelope-fill input-icon"></i>
+            {{ form.email }}
+        </div>
         {% if form.email.errors %}
-        <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+        <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.email.errors.0 }}</div>
         {% endif %}
     </div>
 
-    <div class="mb-3">
-        <label for="{{ form.password1.id_for_label }}" class="form-label fw-semibold">Password</label>
-        {{ form.password1 }}
+    <div class="starry-input-group">
+        <label class="form-label small fw-semibold text-secondary mb-1">Password</label>
+        <div class="position-relative">
+            <i class="bi bi-shield-lock-fill input-icon"></i>
+            {{ form.password1 }}
+        </div>
         {% if form.password1.errors %}
-        <div class="text-danger small mt-1">{{ form.password1.errors.0 }}</div>
+        <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.password1.errors.0 }}</div>
         {% endif %}
     </div>
 
-    <div class="mb-4">
-        <label for="{{ form.password2.id_for_label }}" class="form-label fw-semibold">Confirm Password</label>
-        {{ form.password2 }}
+    <div class="starry-input-group mb-2">
+        <div class="d-flex justify-content-between align-items-center mb-1">
+            <label class="form-label small fw-semibold text-secondary mb-0">Confirm Password</label>
+            <span id="match-indicator" class="small" style="font-size: 0.76rem;"></span>
+        </div>
+        <div class="position-relative">
+            <i class="bi bi-shield-check input-icon"></i>
+            {{ form.password2 }}
+        </div>
         {% if form.password2.errors %}
-        <div class="text-danger small mt-1">{{ form.password2.errors.0 }}</div>
+        <div class="text-danger small mt-1" style="font-size: 0.78rem;">{{ form.password2.errors.0 }}</div>
         {% endif %}
     </div>
 
-    <button type="submit" class="btn btn-snoozr mb-3">
-        <i class="bi bi-person-plus me-2"></i>Create Account
+    <!-- Password match meter -->
+    <div class="progress mb-4" style="height: 4px; background: rgba(255, 255, 255, 0.08); border-radius: 2px;">
+        <div id="password-match-bar" class="progress-bar" role="progressbar" style="width: 0%; transition: all 0.3s;"></div>
+    </div>
+
+    <button type="submit" class="btn btn-starry w-100 py-3 mb-4">
+        <i class="bi bi-check2-circle"></i>
+        <span>Create My Starry Account</span>
     </button>
 </form>
 
-<div class="text-center">
-    <p class="mb-0">Already have an account? <a href="{% url 'accounts:login' %}" class="fw-semibold">Sign in</a></p>
+<div class="text-center pt-2" style="border-top: 1px solid rgba(255, 255, 255, 0.08);">
+    <p class="mb-0 text-secondary small">
+        Already have a Snoozr account? 
+        <a href="{% url 'accounts:login' %}" class="fw-bold text-decoration-none" style="color: var(--star-gold);">
+            Sign In Here <i class="bi bi-arrow-right-short"></i>
+        </a>
+    </p>
 </div>
+
+<script>
+    // Live password matching check
+    document.addEventListener('DOMContentLoaded', () => {
+        const p1 = document.querySelector('input[name="password1"]');
+        const p2 = document.querySelector('input[name="password2"]');
+        const indicator = document.getElementById('match-indicator');
+        const matchBar = document.getElementById('password-match-bar');
+
+        // Style all generated Django form inputs with .starry-input
+        document.querySelectorAll('#register-form input:not([type="hidden"]):not([type="submit"])').forEach(input => {
+            input.classList.add('starry-input');
+        });
+
+        function checkMatch() {
+            if (!p1 || !p2) return;
+            const val1 = p1.value;
+            const val2 = p2.value;
+
+            if (!val2) {
+                indicator.textContent = '';
+                matchBar.style.width = '0%';
+                return;
+            }
+
+            if (val1 === val2) {
+                indicator.innerHTML = '<span class="text-success"><i class="bi bi-check-circle-fill"></i> Passwords match</span>';
+                matchBar.style.width = '100%';
+                matchBar.className = 'progress-bar bg-success';
+            } else {
+                indicator.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-circle-fill"></i> Passwords do not match</span>';
+                matchBar.style.width = '40%';
+                matchBar.className = 'progress-bar bg-warning';
+            }
+        }
+
+        if (p1 && p2) {
+            p1.addEventListener('input', checkMatch);
+            p2.addEventListener('input', checkMatch);
+        }
+    });
+</script>
 {% endblock %}
