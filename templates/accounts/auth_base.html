@@ -4,98 +4,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Snoozr{% endblock %}</title>
+    <title>{% block title %}Snoozr - The Starry Sleep Experience{% endblock %}</title>
+
+    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Snoozr Starry Night Theme -->
+    <link rel="stylesheet" href="{% static 'css/starry-night.css' %}">
+
     <style>
-        :root {
-            --snoozr-primary: #4e54c8;
-            --snoozr-secondary: #8f94fb;
-            --snoozr-dark: #1a1a2e;
-        }
-        body {
+        .auth-wrapper {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: linear-gradient(135deg, var(--snoozr-dark) 0%, #16213e 50%, #0f3460 100%);
+            padding: 2.5rem 1rem;
+            position: relative;
+            z-index: 2;
         }
-        .auth-card {
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 450px;
-            width: 100%;
-            background: white;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        }
-        .btn-snoozr {
-            background: linear-gradient(135deg, var(--snoozr-primary), var(--snoozr-secondary));
-            border: none;
-            color: white;
-            padding: 10px 30px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        .btn-snoozr:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(78, 84, 200, 0.4);
-            color: white;
-        }
-        .form-control:focus {
-            border-color: var(--snoozr-secondary);
-            box-shadow: 0 0 0 0.2rem rgba(143, 148, 251, 0.25);
-        }
-        .brand-icon { font-size: 2.5rem; color: var(--snoozr-primary); }
-        .alert { border-radius: 10px; border: none; }
-        a { color: var(--snoozr-primary); }
-        a:hover { color: var(--snoozr-secondary); }
 
-        .stars {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            overflow: hidden;
-            z-index: 0;
+        .auth-container-box {
+            max-width: 500px;
+            width: 100%;
+            padding: 2.75rem 2.5rem;
         }
-        .star {
+
+        .auth-brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255, 209, 102, 0.12);
+            border: 1px solid rgba(255, 209, 102, 0.3);
+            border-radius: 20px;
+            padding: 6px 16px;
+            color: var(--star-gold);
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 0 15px rgba(255, 209, 102, 0.2);
+        }
+
+        .ambient-control-bar {
             position: absolute;
-            width: 3px; height: 3px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.5;
-            animation: twinkle 3s infinite alternate;
-        }
-        @keyframes twinkle {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
+            top: 24px;
+            right: 28px;
+            z-index: 10;
         }
     </style>
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
-    <!-- Stars background -->
-    <div class="stars">
-        {% for i in "xxxxxxxxxxxxxxxxxxxx" %}
-        <div class="star" style="top: {{ forloop.counter0|add:'5' }}%; left: {% widthratio forloop.counter 1 5 %}%; animation-delay: {{ forloop.counter0 }}00ms;"></div>
-        {% endfor %}
+    <!-- 3D Three.js Starry Night Dynamic Canvas -->
+    <div id="starry-canvas-container"></div>
+    <div class="cosmic-vignette"></div>
+
+    <!-- Ambient Soundscape Control -->
+    <div class="ambient-control-bar">
+        <button id="night-audio-toggle" class="ambient-sound-pill" onclick="window.toggleNightAmbience()" title="Toggle Starry Night Ambience">
+            <i id="night-audio-icon" class="bi bi-volume-mute-fill"></i>
+            <span>Sleep Ambience</span>
+        </button>
     </div>
 
-    <div class="auth-card position-relative" style="z-index: 1;">
-        <!-- Messages -->
-        {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show mb-3" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    <!-- Auth Form Container -->
+    <div class="auth-wrapper">
+        <div class="starry-glass-card auth-container-box">
+            <!-- Global Flash Messages -->
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert starry-alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show mb-4" role="alert">
+                <div class="d-flex align-items-center">
+                    {% if message.tags == 'error' %}
+                    <i class="bi bi-exclamation-octagon-fill me-2 text-danger fs-5"></i>
+                    {% elif message.tags == 'success' %}
+                    <i class="bi bi-stars me-2 text-warning fs-5"></i>
+                    {% else %}
+                    <i class="bi bi-info-circle-fill me-2 text-info fs-5"></i>
+                    {% endif %}
+                    <span class="small">{{ message }}</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            {% block auth_content %}{% endblock %}
         </div>
-        {% endfor %}
-        {% endif %}
-
-        {% block auth_content %}{% endblock %}
     </div>
 
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Starry Night 3D Script -->
+    <script src="{% static 'js/starry-night-3d.js' %}"></script>
+
+    <script>
+        // Smooth entrance animations using GSAP
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof gsap !== 'undefined') {
+                gsap.from('.auth-container-box', {
+                    opacity: 0,
+                    y: 30,
+                    scale: 0.96,
+                    duration: 1,
+                    ease: 'power3.out'
+                });
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>
