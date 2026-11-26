@@ -2,9 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.utils import timezone
+from decimal import Decimal
 from .forms import RegistrationForm, ProfileUpdateForm
 from .decorators import admin_required, member_required
 from .models import CustomUser
+from sleep_tracking.models import SleepGoal
 
 
 def register_view(request):
@@ -18,6 +21,12 @@ def register_view(request):
             user = form.save(commit=False)
             user.role = 'member'  # Default role for new registrations
             user.save()
+            # BR-14: every new account starts with a default goal of 8.0 hours
+            SleepGoal.objects.get_or_create(
+                user=user,
+                effective_from=timezone.localdate(),
+                defaults={'target_hours': Decimal('8.0')}
+            )
             messages.success(request, 'Account created successfully! You can now log in.')
             return redirect('accounts:login')
         else:
