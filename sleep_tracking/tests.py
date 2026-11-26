@@ -333,3 +333,42 @@ class SleepTrackingViewTests(TestCase):
         self.assertEqual(res_data.status_code, 200)
         self.assertContains(res_data, 'Average Sleep')
         self.assertContains(res_data, 'Goal Success Rate')
+
+    def test_f11_search_and_filter_and_br24_br25(self):
+        """F-11, BR-24, BR-25: Multi-filter combines with AND; start date <= end date."""
+        tag = Tag.objects.create(user=self.user, name='Midterms')
+        bed = self.now - timedelta(hours=8)
+        wake = self.now - timedelta(hours=1)
+        log = SleepLog.objects.create(user=self.user, bedtime=bed, wake_time=wake, note='Studied calculus')
+        log.tags.add(tag)
+
+        # Keyword match in note
+        res = self.client.get(reverse('sleep_tracking:history') + '?q=calculus')
+        self.assertEqual(res.status_code, 200)
+        self.assertContains(res, 'Studied calculus')
+
+        # Keyword match in tag
+        res_tag = self.client.get(reverse('sleep_tracking:history') + '?q=midterms')
+        self.assertEqual(res_tag.status_code, 200)
+        self.assertContains(res_tag, 'Midterms')
+
+        # Invalid date range: start > end (BR-25)
+        res_invalid = self.client.get(reverse('sleep_tracking:history') + '?start_date=2026-12-10&end_date=2026-12-01')
+        self.assertEqual(res_invalid.status_code, 200)
+        self.assertContains(res_invalid, 'Start date cannot be later than end date')
+
+    def test_br23_tag_deletion_cascade(self):
+        """BR-23: Deleting tag removes it from entries but keeps the entries."""
+        tag = Tag.objects.create(user=self.user, name='Temporary')
+        bed = self.now - timedelta(hours=8)
+        wake = self.now - timedelta(hours=1)
+        log = SleepLog.objects.create(user=self.user, bedtime=bed, wake_time=wake)
+        log.tags.add(tag)
+
+        self.assertEqual(log.tags.count(), 1)
+        tag.delete()
+
+        # Log must still exist, but tag is removed
+        self.assertTrue(SleepLog.objects.filter(pk=log.pk).exists())
+        log.refresh_from_db()
+        self.assertEqual(log.tags.count(), 0)

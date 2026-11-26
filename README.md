@@ -303,12 +303,12 @@ The data model consists of **six relational entities**:
 
 ## 🧪 8. Testing Suite
 
-Run the automated unit tests verifying authentication, data models, and business rule enforcement:
+Run the full automated test suite verifying all 13 features, data models, and 26 business rules:
 ```bash
-python manage.py test accounts
+python manage.py test accounts sleep_tracking
 ```
 
-Run Playwright end-to-end integration tests (if installed):
+Run Playwright end-to-end integration tests (optional browser verification):
 ```bash
 python tests/e2e_playwright.py
 ```
@@ -320,15 +320,22 @@ python tests/e2e_playwright.py
 ```
 Snoozr/
 ├── snoozr_project/           # Django project root settings and URL routing
-│   ├── settings.py           # Application settings, database config, auth backends
-│   ├── urls.py               # Main URL dispatcher
+│   ├── settings.py           # Application settings, database-agnostic DB config, session rules
+│   ├── urls.py               # Main URL dispatcher (/accounts/, /sleep/)
 │   └── wsgi.py
-├── accounts/                 # User authentication and profile app (F-01, F-02, F-03, F-08)
-│   ├── models.py             # User and profile models
-│   ├── forms.py              # Registration, login, and profile forms
-│   ├── views.py              # Auth flows and profile management views
+├── accounts/                 # User authentication, profiles, role dashboards (F-01, F-02, F-03, F-08)
+│   ├── models.py             # CustomUser model & Profile (1:1 with user, timezone default 'Asia/Manila')
+│   ├── forms.py              # Registration, login, and profile update forms (with timezone selector)
+│   ├── views.py              # Auth flows, profile views, member and admin dashboards
 │   ├── urls.py               # Account routes
-│   └── tests.py              # Model and view test cases
+│   └── tests.py              # Unit tests for authentication and role protections
+├── sleep_tracking/           # Core Vertical Slice: Sleep logging, analytics, and tags (F-04 to F-13)
+│   ├── models.py             # SleepLog, SleepGoal, Tag, SleepLogTag (BR-07 to BR-23)
+│   ├── forms.py              # SleepLogForm (auto validation), TagForm, SleepGoalForm
+│   ├── views.py              # Log entry, history, edit, delete, tag CRUD, summary report, trend API
+│   ├── urls.py               # Sleep tracking routes (/sleep/new/, /sleep/history/, etc.)
+│   ├── admin.py              # Django admin registrations
+│   └── tests.py              # 33+ comprehensive test cases for all business rules and CRUD flows
 ├── static/
 │   ├── css/
 │   │   ├── starry-night.css  # Starry Night aesthetic design system
@@ -336,16 +343,64 @@ Snoozr/
 │   └── js/
 │       └── starry-night-3d.js # Three.js canvas & night sky simulation
 ├── templates/
-│   ├── base.html             # Master layout with celestial canvas & navigation
-│   └── accounts/
-│       ├── login.html        # Login view
-│       ├── register.html     # Registration with validation indicators
-│       ├── profile.html      # Student profile view
-│       └── profile_edit.html # Profile edit view
+│   ├── base.html             # Master layout with celestial canvas, top navbar, & Chart.js
+│   ├── accounts/
+│   │   ├── login.html        # Login view with demo credentials autofill
+│   │   ├── register.html     # Registration with validation indicators & auto 8h goal creation
+│   │   ├── member_dashboard.html # Core dashboard (F-06), 7-day average, goal tracker, Chart.js trend
+│   │   ├── admin_dashboard.html  # Administrative observatory
+│   │   ├── profile.html      # Student profile view with timezone and sleep target
+│   │   └── profile_edit.html # Profile edit view with timezone selection
+│   └── sleep_tracking/
+│       ├── sleep_log_form.html   # Log sleep entry / edit form with live JS duration preview
+│       ├── sleep_log_confirm_delete.html # Permanent delete confirmation modal/page (BR-19)
+│       ├── sleep_history.html    # Browsable paginated list & calendar view with multi-criteria search
+│       ├── tag_management.html   # Tag CRUD (create, rename, delete)
+│       ├── sleep_goal.html       # Sleep goal history & effective date updater
+│       └── sleep_summary_report.html # 7-to-90-day comprehensive analytics report with per-tag stats
 ├── tests/
 │   └── e2e_playwright.py     # Playwright browser automation test suite
 ├── Dollison-Selwyn-SDD 2.pdf # Official Software Design Document (CSIT327)
-├── requirements.txt          # Python dependencies
+├── requirements.txt          # Python dependencies (Django, Pillow, psycopg2-binary, etc.)
 ├── .env.example              # Sample environment configuration
-└── README.md                 # Project documentation
+└── README.md                 # Complete project documentation
+```
+
+---
+
+## 📋 10. Manual Testing Checklist
+
+| Step | Feature | Action | Expected Result |
+|---|---|---|---|
+| 1 | **F-01 Register** | Navigate to `/accounts/register/`, sign up a new student | Account is created, password salted/hashed, Profile & default 8.0h sleep goal created automatically (BR-14) |
+| 2 | **F-02 / F-03 Login & Logout** | Sign in with valid credentials, then log out | Session cookie created with 14-day duration (BR-06); logging out immediately terminates the session |
+| 3 | **F-04 Log Sleep Entry** | Go to `/sleep/new/`, enter yesterday 11 PM to today 7 AM | Live preview calculates 8h 00m; saves to database, sets sleep date to wake date (BR-11), redirects with success message |
+| 4 | **BR-07 & BR-09 Validation** | Enter wake time earlier than bedtime or > 24 hours | Rejection with clear validation error messages |
+| 5 | **BR-10 Future Validation** | Enter a future bedtime or wake time | Form rejects future timestamps with error message |
+| 6 | **BR-11 Single Entry Per Date** | Attempt to log a second sleep entry waking on the same date | Blocked by unique constraint on `(user_id, sleep_date)` |
+| 7 | **BR-12 Overlap Validation** | Log an entry that overlaps with an existing time range | System prevents overlapping entries with an explanatory error |
+| 8 | **F-12 Tag Management** | Go to `/sleep/tags/`, create tag "Exam Week" | Tag created (1-30 chars, BR-20); unique per user case-insensitive |
+| 9 | **BR-21 & BR-22 Tag Constraints** | Attach up to 5 tags to an entry | Attaching more than 5 is blocked; user can only attach their own tags |
+| 10 | **BR-23 Tag Deletion Cascade** | Delete tag "Exam Week" on `/sleep/tags/` | Tag link is removed, but original sleep logs remain completely intact |
+| 11 | **F-05 Sleep History** | Go to `/sleep/history/`, browse list and calendar | Shows paginated entries newest first; calendar displays days with goal badges |
+| 12 | **F-11 Search & Multi-filter** | Enter keyword in notes/tags, pick date range | Results filtered by `AND` combination (BR-24); invalid date range displays error (BR-25) |
+| 13 | **BR-19 Edit & Delete Entry** | Edit an entry's notes/times; delete an entry | Updating updates `updated_at`; deleting requires explicit user confirmation |
+| 14 | **F-06 & F-07 Dashboard & Trends** | Open Dashboard (`/accounts/dashboard/`) | Shows last night's sleep, 7-day rolling average (or "No data", BR-17), goal tracker (e.g. 5 of 7 days met), and Chart.js trend |
+| 15 | **F-08 Profile & Timezone** | Go to `/accounts/profile/edit/`, change timezone | Timezone updated; sleep date and dashboard reflect updated timezone |
+| 16 | **F-13 Summary Report** | Go to `/sleep/report/`, select 7, 14, 30, 90 days | Shows total nights, average, min/max, goal success rate, and per-tag averages |
+| 17 | **BR-05 User Data Isolation** | Log in as Student A; attempt to edit Student B's log via URL ID | Returns HTTP 404 (strictly scoped to `request.user`) |
+
+---
+
+## 🌿 11. Git Branching Strategy & Workflow (PD2)
+
+This repository follows the strict branching model required for **Project Development 2**:
+* **`main`**: Production & stable release only. No direct commits allowed.
+* **`develop`**: Central integration branch branched from `main`.
+* **`feature/<name>`**: Individual feature branches created from `develop`.
+  1. `feature/sleep-log`: Core Sleep Log models, CRUD operations, validations, and tests (PR #1 &rarr; `develop`).
+  2. `feature/dashboard-goals`: Dashboard analytics, Chart.js weekly/monthly trend charts, goal tracker, and timezone settings (PR #2 &rarr; `develop`).
+  3. `feature/search-tags-report`: Multi-criteria search/filter, tag management cascade, summary reporting, documentation, and test verification (PR #3 &rarr; `develop`).
+* **Release Workflow:** Once all feature branches are merged into `develop`, a final Pull Request merges `develop` into `main`. No merged feature branches are deleted.
+
 ```
