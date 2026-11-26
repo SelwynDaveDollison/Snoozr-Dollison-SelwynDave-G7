@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}{% if is_edit %}Edit Sleep Entry{% else %}Log Sleep Entry{% endif %} - Snoozr{% endblock %}
+
+{% block content %}
+<div class="container dashboard-container" style="max-width: 760px;">
+    <!-- Navigation Breadcrumb -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <a href="{% url 'sleep_tracking:history' %}" class="btn btn-sm btn-starry-outline">
+                <i class="bi bi-arrow-left"></i> Back to History
+            </a>
+        </div>
+        <div class="text-end">
+            <a href="{% url 'sleep_tracking:tags' %}" class="btn btn-sm btn-starry-outline text-warning">
+                <i class="bi bi-tags-fill"></i> Manage Tags
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Card -->
+    <div class="starry-glass-card p-4 p-md-5">
+        <div class="text-center mb-4">
+            <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill" style="background: rgba(255, 209, 102, 0.15); border: 1px solid rgba(255, 209, 102, 0.35);">
+                <i class="bi bi-moon-stars-fill text-warning"></i>
+                <span class="small fw-semibold text-warning">{% if is_edit %}EDIT SLEEP RECORD{% else %}RECORD NEW SLEEP{% endif %}</span>
+            </div>
+            <h2 class="display-6 fw-bold mb-1 text-gold-gradient">
+                {% if is_edit %}Update Sleep Entry{% else %}Log Last Night's Sleep{% endif %}
+            </h2>
+            <p class="text-secondary small">
+                Enter your bedtime and wake time. The system will automatically compute your hours slept.
+            </p>
+        </div>
+
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger starry-alert mb-4">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {% for error in form.non_field_errors %}
+                <div>{{ error }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="POST" novalidate id="sleep-log-form">
+            {% csrf_token %}
+
+            <div class="row g-3 mb-4">
+                <!-- Bedtime Input -->
+                <div class="col-md-6">
+                    <label for="{{ form.bedtime.id_for_label }}" class="form-label small fw-semibold text-secondary mb-1">
+                        <i class="bi bi-moon-fill text-info me-1"></i> Bedtime (Went to Sleep) *
+                    </label>
+                    {{ form.bedtime }}
+                    {% if form.bedtime.errors %}
+                        <div class="text-danger small mt-1">{{ form.bedtime.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-text text-muted small">Date & time you fell asleep</div>
+                </div>
+
+                <!-- Wake Time Input -->
+                <div class="col-md-6">
+                    <label for="{{ form.wake_time.id_for_label }}" class="form-label small fw-semibold text-secondary mb-1">
+                        <i class="bi bi-sun-fill text-warning me-1"></i> Wake Time (Woke Up) *
+                    </label>
+                    {{ form.wake_time }}
+                    {% if form.wake_time.errors %}
+                        <div class="text-danger small mt-1">{{ form.wake_time.errors.0 }}</div>
+                    {% endif %}
+                    <div class="form-text text-muted small">Date & time you woke up (determines sleep date)</div>
+                </div>
+            </div>
+
+            <!-- Dynamic Duration Preview Pill -->
+            <div id="duration-preview-box" class="p-3 mb-4 rounded-3 text-center" style="background: rgba(112, 214, 255, 0.08); border: 1px dashed rgba(112, 214, 255, 0.35);">
+                <div class="small text-secondary mb-1">Calculated Sleep Duration (BR-08)</div>
+                <div class="fs-4 fw-bold text-cyan-gradient" id="computed-duration-text">
+                    {% if is_edit %}{{ log.formatted_duration }} ({{ log.duration_hours }} hrs){% else %}-- hours -- mins{% endif %}
+                </div>
+                <div class="small text-muted mt-1" id="duration-feedback">
+                    {% if is_edit %}Target Goal: {{ log.target_goal }}h &bull; {% if log.is_goal_met %}<span class="text-success">Goal Met ★</span>{% else %}<span class="text-warning">Below Goal</span>{% endif %}{% else %}Must be between 1 minute and 24 hours (BR-09).{% endif %}
+                </div>
+            </div>
+
+            <!-- Optional Note Input (BR-13) -->
+            <div class="mb-4">
+                <label for="{{ form.note.id_for_label }}" class="form-label small fw-semibold text-secondary mb-1">
+                    <i class="bi bi-journal-text text-warning me-1"></i> Context Notes (Optional, max 255 chars)
+                </label>
+                {{ form.note }}
+                {% if form.note.errors %}
+                    <div class="text-danger small mt-1">{{ form.note.errors.0 }}</div>
+                {% endif %}
+                <div class="form-text text-muted small">e.g. "Exam week review", "Woke up twice", "Late night gaming"</div>
+            </div>
+
+            <!-- Tags Multiple Select (BR-21, BR-22) -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label for="{{ form.tags.id_for_label }}" class="form-label small fw-semibold text-secondary mb-0">
+                        <i class="bi bi-tags text-success me-1"></i> Attach Personal Tags (Max 5)
+                    </label>
+                    <span class="small text-muted" id="tag-count-indicator">Selected: 0/5</span>
+                </div>
+                {{ form.tags }}
+                {% if form.tags.errors %}
+                    <div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>
+                {% endif %}
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                    <div class="form-text text-muted small">Hold <kbd>Ctrl</kbd> (or <kbd>Cmd</kbd> on Mac) to select multiple tags.</div>
+                    <a href="{% url 'sleep_tracking:tags' %}" class="small text-warning text-decoration-none">
+                        + Add new tag
+                    </a>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-starry py-3 fs-6 fw-semibold">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    {% if is_edit %}Save Changes to Sleep Entry{% else %}Save Sleep Entry{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const bedtimeInput = document.getElementById('{{ form.bedtime.id_for_label }}');
+    const wakeTimeInput = document.getElementById('{{ form.wake_time.id_for_label }}');
+    const durationText = document.getElementById('computed-duration-text');
+    const durationFeedback = document.getElementById('duration-feedback');
+    const tagsSelect = document.getElementById('{{ form.tags.id_for_label }}');
+    const tagCountIndicator = document.getElementById('tag-count-indicator');
+
+    function updateDurationPreview() {
+        if (!bedtimeInput.value || !wakeTimeInput.value) return;
+
+        const bed = new Date(bedtimeInput.value);
+        const wake = new Date(wakeTimeInput.value);
+
+        if (isNaN(bed.getTime()) || isNaN(wake.getTime())) return;
+
+        const diffMs = wake.getTime() - bed.getTime();
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+
+        if (diffMins <= 0) {
+            durationText.innerHTML = '<span class="text-danger">Invalid: Wake time must be after bedtime</span>';
+            durationFeedback.textContent = 'Wake time must be later than bedtime (BR-07).';
+        } else if (diffMins > 1440) {
+            durationText.innerHTML = '<span class="text-danger">Invalid: Exceeds 24 hours</span>';
+            durationFeedback.textContent = 'A single sleep entry cannot exceed 24 hours (1,440 mins) (BR-09).';
+        } else {
+            const h = Math.floor(diffMins / 60);
+            const m = diffMins % 60;
+            const frac = (diffMins / 60).toFixed(2);
+            durationText.innerHTML = `<span class="text-gold-gradient">${h}h ${m < 10 ? '0' + m : m}m</span> <small class="text-muted">(${frac} hrs)</small>`;
+            durationFeedback.textContent = 'Duration is valid. The sleep date will be set to your wake date.';
+        }
+    }
+
+    function updateTagCount() {
+        if (!tagsSelect) return;
+        const selected = Array.from(tagsSelect.selectedOptions).length;
+        tagCountIndicator.textContent = `Selected: ${selected}/5`;
+        if (selected > 5) {
+            tagCountIndicator.className = 'small text-danger fw-bold';
+        } else {
+            tagCountIndicator.className = 'small text-muted';
+        }
+    }
+
+    if (bedtimeInput && wakeTimeInput) {
+        bedtimeInput.addEventListener('change', updateDurationPreview);
+        wakeTimeInput.addEventListener('change', updateDurationPreview);
+        updateDurationPreview();
+    }
+
+    if (tagsSelect) {
+        tagsSelect.addEventListener('change', updateTagCount);
+        updateTagCount();
+    }
+});
+</script>
+{% endblock %}
