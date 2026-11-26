@@ -3,27 +3,33 @@
 {% block title %}Member Sanctuary - Snoozr Starry Night{% endblock %}
 
 {% block content %}
-<div class="container">
+<div class="container dashboard-container">
     <!-- Top Welcome Banner -->
     <div class="starry-glass-card p-4 p-md-5 mb-4 position-relative overflow-hidden">
         <div class="row align-items-center">
             <div class="col-lg-8">
-                <div class="d-inline-flex align-items-center gap-2 mb-3 px-3 py-1 rounded-pill" style="background: rgba(112, 214, 255, 0.15); border: 1px solid rgba(112, 214, 255, 0.35);">
+                <div class="d-inline-flex align-items-center gap-2 mb-2 px-3 py-1 rounded-pill" style="background: rgba(112, 214, 255, 0.15); border: 1px solid rgba(112, 214, 255, 0.35);">
                     <i class="bi bi-moon-stars text-cyan-gradient"></i>
                     <span class="small fw-semibold text-cyan-gradient">MEMBER SANCTUARY</span>
                 </div>
                 <h1 class="display-6 fw-bold mb-2">
-                    Good evening, <span class="text-gold-gradient">{{ user.first_name|default:user.username }}</span>.
+                    Welcome back, <span class="text-gold-gradient">{{ user.first_name|default:user.username }}</span>.
                 </h1>
                 <p class="text-secondary mb-4 lead" style="font-size: 1.05rem;">
-                    Tonight's celestial atmosphere is calm. Your circadian rhythm is harmonized with the stars.
+                    Tracking irregular sleep schedules with database precision. Active Target: <strong class="text-white">{{ current_goal_hours }} hrs/night</strong>.
                 </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="{% url 'accounts:profile' %}" class="btn btn-starry">
-                        <i class="bi bi-person-circle"></i> View My Profile
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'sleep_tracking:log_create' %}" class="btn btn-starry px-4 py-2">
+                        <i class="bi bi-plus-circle-fill me-1"></i> Log Sleep Entry
                     </a>
-                    <a href="{% url 'accounts:profile_edit' %}" class="btn btn-starry-outline">
-                        <i class="bi bi-pencil-square"></i> Edit Sleep Profile
+                    <a href="{% url 'sleep_tracking:history' %}" class="btn btn-starry-outline px-3 py-2">
+                        <i class="bi bi-clock-history me-1"></i> View History
+                    </a>
+                    <a href="{% url 'sleep_tracking:report' %}" class="btn btn-starry-outline px-3 py-2">
+                        <i class="bi bi-file-earmark-bar-graph me-1"></i> Summary Report
+                    </a>
+                    <a href="{% url 'sleep_tracking:goal' %}" class="btn btn-starry-outline px-3 py-2">
+                        <i class="bi bi-bullseye me-1"></i> Set Goal
                     </a>
                 </div>
             </div>
@@ -45,147 +51,296 @@
         </div>
     </div>
 
-    <!-- Interactive Sleep Stats Grid -->
+    <!-- Core Metrics Grid (F-06, F-09, BR-16, BR-17) -->
     <div class="row g-4 mb-4">
-        <!-- Sleep Score Card -->
+        <!-- 1. Last Night's Sleep (F-06) -->
         <div class="col-md-4">
             <div class="starry-stat-card h-100">
-                <i class="bi bi-stars stat-icon text-warning"></i>
-                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Sleep Score</div>
-                <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <h2 class="display-5 fw-bold mb-0 text-gold-gradient">92</h2>
-                    <span class="text-success small fw-semibold"><i class="bi bi-arrow-up-right"></i> Optimal</span>
+                <i class="bi bi-moon-stars stat-icon text-warning"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Last Night's Sleep</div>
+                {% if last_night_log %}
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                    <h2 class="display-6 fw-bold mb-0 text-gold-gradient">{{ last_night_log.formatted_duration }}</h2>
+                    <span class="small text-secondary">({{ last_night_log.duration_hours }}h)</span>
                 </div>
-                <p class="text-secondary small mb-3">Deep restorative slumber detected. 8h 15m duration.</p>
-                <div class="progress" style="height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px;">
-                    <div class="progress-bar" style="width: 92%; background: linear-gradient(90deg, #ffa000, #ffd166);"></div>
+                <div class="small text-secondary mb-2">
+                    {{ last_night_log.sleep_date|date:"D, M d" }} &bull; {{ last_night_log.bedtime|date:"H:i" }} &rarr; {{ last_night_log.wake_time|date:"H:i" }}
                 </div>
+                <div>
+                    {% if last_night_log.is_goal_met %}
+                    <span class="badge" style="background: rgba(255, 209, 102, 0.2); color: var(--star-gold); border: 1px solid rgba(255, 209, 102, 0.4);">
+                        <i class="bi bi-star-fill me-1"></i> Goal Achieved (Target: {{ last_night_log.target_goal }}h)
+                    </span>
+                    {% else %}
+                    <span class="badge" style="background: rgba(255, 255, 255, 0.08); color: #94a3b8; border: 1px solid rgba(255, 255, 255, 0.15);">
+                        Below Target (Target: {{ last_night_log.target_goal }}h)
+                    </span>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="py-3 text-muted">
+                    <div class="fs-5 text-secondary">No entries yet</div>
+                    <div class="small mt-1">Log your first sleep session to see stats here.</div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- Bedtime Consistency -->
+        <!-- 2. 7-Day Average (F-06, BR-17) -->
         <div class="col-md-4">
             <div class="starry-stat-card h-100">
-                <i class="bi bi-alarm-fill stat-icon text-info"></i>
-                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Ideal Bedtime</div>
-                <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <h2 class="display-5 fw-bold mb-0 text-cyan-gradient">10:30 PM</h2>
+                <i class="bi bi-activity stat-icon text-cyan-gradient"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">7-Day Rolling Average</div>
+                {% if seven_day_avg_hours %}
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                    <h2 class="display-6 fw-bold mb-0 text-cyan-gradient">{{ seven_day_avg_formatted }}</h2>
+                    <span class="small text-secondary">({{ seven_day_avg_hours }}h)</span>
                 </div>
-                <p class="text-secondary small mb-3">Target wake time: 6:30 AM (8h sleep window).</p>
+                <p class="text-secondary small mb-3">Mean duration over the last 7 calendar days (days without logs excluded).</p>
                 <div class="progress" style="height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px;">
-                    <div class="progress-bar" style="width: 85%; background: linear-gradient(90deg, #2c73d2, #70d6ff);"></div>
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {% widthratio seven_day_avg_hours 12 100 %}%;"></div>
                 </div>
+                {% else %}
+                <div class="py-3 text-muted">
+                    <div class="fs-4 fw-bold text-secondary">No data</div>
+                    <div class="small mt-1">No sleep logs recorded in the last 7 calendar days (BR-17).</div>
+                </div>
+                {% endif %}
             </div>
         </div>
 
-        <!-- REM & Deep Sleep -->
+        <!-- 3. Sleep Goal Tracker (F-09, BR-16) -->
         <div class="col-md-4">
             <div class="starry-stat-card h-100">
-                <i class="bi bi-activity stat-icon text-danger"></i>
-                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Deep & REM Phase</div>
-                <div class="d-flex align-items-baseline gap-2 mb-2">
-                    <h2 class="display-5 fw-bold mb-0 text-white">3h 40m</h2>
-                    <span class="badge-role-member" style="font-size: 0.7rem;">44% of total</span>
+                <i class="bi bi-bullseye stat-icon text-success"></i>
+                <div class="small text-muted text-uppercase fw-semibold tracking-wider mb-2">Sleep Goal Tracker</div>
+                <div class="d-flex align-items-baseline gap-2 mb-1">
+                    <h2 class="display-6 fw-bold mb-0 text-white">{{ goals_met_7d }} of 7</h2>
+                    <span class="small text-secondary">days met</span>
                 </div>
-                <p class="text-secondary small mb-3">Optimal brain recovery and memory consolidation.</p>
-                <div class="progress" style="height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 4px;">
-                    <div class="progress-bar" style="width: 78%; background: linear-gradient(90deg, #845ec2, #ff758f);"></div>
+                <p class="text-secondary small mb-3">
+                    Target: <strong class="text-white">{{ current_goal_hours }}h</strong>. Recorded {{ logged_days_7d }} of last 7 days.
+                </p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'sleep_tracking:goal' %}" class="small text-warning text-decoration-none">
+                        <i class="bi bi-sliders me-1"></i> Change Goal
+                    </a>
+                    <span class="small text-muted">Effective: Today</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Quick Bedtime Logging & Starry Night Sleep Tips -->
-    <div class="row g-4">
-        <!-- Sleep Journal / Mood Logger -->
-        <div class="col-lg-7">
-            <div class="starry-glass-card p-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5 class="fw-bold mb-0"><i class="bi bi-journal-bookmark-fill text-warning me-2"></i>Tonight's Sleep Prep</h5>
-                    <span class="badge" style="background: rgba(255, 209, 102, 0.15); color: var(--star-gold);">Interactive</span>
+    <!-- Trend Chart Card (F-06, F-07, BR-18) -->
+    <div class="starry-glass-card p-4 p-md-5 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+            <div>
+                <h4 class="fw-bold text-white mb-1">
+                    <i class="bi bi-graph-up text-warning me-2"></i>Weekly & Monthly Sleep Trend
+                </h4>
+                <div class="text-secondary small">
+                    Hours slept per day with target goal threshold. Missing days appear as gaps (BR-18).
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label text-secondary small">Pre-Sleep Mental State</label>
-                    <div class="d-flex gap-2 flex-wrap" id="mood-selector">
-                        <button type="button" class="btn btn-starry-outline py-2 px-3 active" onclick="selectMood(this, 'Calm')">
-                            🌙 Peaceful Calm
-                        </button>
-                        <button type="button" class="btn btn-starry-outline py-2 px-3" onclick="selectMood(this, 'Fatigued')">
-                            😴 Exhausted
-                        </button>
-                        <button type="button" class="btn btn-starry-outline py-2 px-3" onclick="selectMood(this, 'Restless')">
-                            ⚡ Racing Mind
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="form-label text-secondary small">Reflections for Tonight's Slumber</label>
-                    <textarea class="form-control starry-input" rows="3" placeholder="Jot down a peaceful thought before stepping into the stars..." id="journal-input"></textarea>
-                </div>
-
-                <div class="d-flex justify-content-between align-items-center">
-                    <button type="button" class="btn btn-starry" onclick="logSleepPrep()">
-                        <i class="bi bi-cloud-moon-fill"></i> Save Sleep Prep
-                    </button>
-                    <span id="save-status" class="small text-success" style="display: none;">
-                        <i class="bi bi-check-circle-fill"></i> Logged to stars!
-                    </span>
-                </div>
+            </div>
+            <!-- Range Selector Buttons -->
+            <div class="btn-group btn-group-sm" role="group">
+                <button type="button" class="btn btn-starry chart-range-btn active" data-days="7">7 Days</button>
+                <button type="button" class="btn btn-starry-outline chart-range-btn" data-days="14">14 Days</button>
+                <button type="button" class="btn btn-starry-outline chart-range-btn" data-days="30">30 Days</button>
             </div>
         </div>
 
-        <!-- Starry Sleep Routine Guide -->
-        <div class="col-lg-5">
-            <div class="starry-glass-card p-4 h-100">
-                <h5 class="fw-bold mb-3"><i class="bi bi-stars text-cyan-gradient me-2"></i>Van Gogh's Rest Ritual</h5>
-                <ul class="list-unstyled d-flex flex-column gap-3 mb-0">
-                    <li class="d-flex gap-3 align-items-start p-2 rounded-3" style="background: rgba(255,255,255,0.03);">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center p-2" style="background: rgba(255, 209, 102, 0.15); color: var(--star-gold); width: 40px; height: 40px;">
-                            <i class="bi bi-brightness-alt-high"></i>
-                        </div>
-                        <div>
-                            <div class="fw-semibold text-white small">Dim Artificial Light</div>
-                            <div class="text-secondary small">Switch screens to warm amber tones 1 hour before sleep.</div>
-                        </div>
-                    </li>
-                    <li class="d-flex gap-3 align-items-start p-2 rounded-3" style="background: rgba(255,255,255,0.03);">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center p-2" style="background: rgba(112, 214, 255, 0.15); color: var(--star-cyan); width: 40px; height: 40px;">
-                            <i class="bi bi-wind"></i>
-                        </div>
-                        <div>
-                            <div class="fw-semibold text-white small">Cool Midnight Chamber</div>
-                            <div class="text-secondary small">Optimal bedroom temp is 18°C (65°F) for deep sleep.</div>
-                        </div>
-                    </li>
-                    <li class="d-flex gap-3 align-items-start p-2 rounded-3" style="background: rgba(255,255,255,0.03);">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center p-2" style="background: rgba(132, 94, 194, 0.15); color: #d65db1; width: 40px; height: 40px;">
-                            <i class="bi bi-headphones"></i>
-                        </div>
-                        <div>
-                            <div class="fw-semibold text-white small">Binaural Night Ambience</div>
-                            <div class="text-secondary small">Use our top-right button to listen to nocturnal sound waves.</div>
-                        </div>
-                    </li>
-                </ul>
+        <div style="height: 320px; position: relative;">
+            <canvas id="sleepTrendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Sleep Logs Table (F-05) -->
+    <div class="starry-glass-card p-0 overflow-hidden mb-4">
+        <div class="p-4 d-flex justify-content-between align-items-center border-bottom" style="border-color: var(--glass-border) !important;">
+            <div>
+                <h5 class="fw-bold text-white mb-0">Recent Sleep Entries</h5>
+                <div class="text-secondary small">Latest recorded sleep sessions</div>
             </div>
+            <a href="{% url 'sleep_tracking:history' %}" class="btn btn-sm btn-starry-outline">
+                View All ({{ total_logs_count }}) &rarr;
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle starry-table">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02);">
+                        <th class="py-3 px-4 text-secondary small text-uppercase">Sleep Date</th>
+                        <th class="py-3 px-3 text-secondary small text-uppercase">Bedtime &rarr; Wake</th>
+                        <th class="py-3 px-3 text-secondary small text-uppercase">Duration</th>
+                        <th class="py-3 px-3 text-secondary small text-uppercase">Goal Met</th>
+                        <th class="py-3 px-3 text-secondary small text-uppercase">Context Note</th>
+                        <th class="py-3 px-3 text-secondary small text-uppercase">Tags</th>
+                        <th class="py-3 px-4 text-secondary small text-uppercase text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in recent_logs %}
+                    <tr>
+                        <td class="py-3 px-4 fw-bold text-white">
+                            <i class="bi bi-calendar-event text-info me-2"></i>{{ log.sleep_date|date:"M d, Y" }}
+                        </td>
+                        <td class="py-3 px-3 text-secondary small">
+                            {{ log.bedtime|date:"H:i" }} &rarr; {{ log.wake_time|date:"H:i" }}
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="fw-bold {% if log.is_goal_met %}text-gold-gradient{% else %}text-white{% endif %}">
+                                {{ log.formatted_duration }}
+                            </span>
+                        </td>
+                        <td class="py-3 px-3">
+                            {% if log.is_goal_met %}
+                            <span class="badge bg-warning text-dark"><i class="bi bi-star-fill me-1"></i>Met</span>
+                            {% else %}
+                            <span class="badge bg-secondary">Below</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-3 small text-secondary">
+                            {{ log.note|default:"&mdash;" }}
+                        </td>
+                        <td class="py-3 px-3">
+                            {% for tag in log.tags.all %}
+                            <span class="badge rounded-pill me-1" style="background: rgba(112, 214, 255, 0.15); color: #70d6ff; border: 1px solid rgba(112, 214, 255, 0.3);">
+                                {{ tag.name }}
+                            </span>
+                            {% empty %}
+                            <span class="text-muted small">&mdash;</span>
+                            {% endfor %}
+                        </td>
+                        <td class="py-3 px-4 text-end">
+                            <a href="{% url 'sleep_tracking:log_update' log.pk %}" class="btn btn-sm btn-starry-outline py-1 px-2" title="Edit">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="py-4 text-center text-muted">
+                            No sleep entries logged yet. Click "Log Sleep Entry" above to add your first night.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
 
+<!-- Chart.js Trend Initialization Script (F-07, BR-18) -->
 <script>
-    function selectMood(btn, mood) {
-        document.querySelectorAll('#mood-selector button').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('sleepTrendChart').getContext('2d');
+    let trendChart = null;
+
+    function loadTrendData(days) {
+        fetch(`{% url 'sleep_tracking:trend_api' %}?days=${days}`)
+            .then(res => res.json())
+            .then(data => {
+                renderChart(data.labels, data.durations, data.goals);
+            })
+            .catch(err => console.error("Error loading trend data:", err));
     }
 
-    function logSleepPrep() {
-        const status = document.getElementById('save-status');
-        status.style.display = 'inline-block';
-        setTimeout(() => {
-            status.style.display = 'none';
-        }, 3000);
+    function renderChart(labels, durations, goals) {
+        if (trendChart) {
+            trendChart.destroy();
+        }
+
+        trendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Hours Slept',
+                        data: durations,
+                        borderColor: '#ffd166',
+                        backgroundColor: 'rgba(255, 209, 102, 0.15)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#ffd166',
+                        pointBorderColor: '#0a0f28',
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        spanGaps: false, // BR-18: Days without entry appear as gaps, not zero hours
+                        fill: true,
+                        tension: 0.3,
+                    },
+                    {
+                        label: 'Target Goal',
+                        data: goals,
+                        borderColor: '#70d6ff',
+                        borderWidth: 2,
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        fill: false,
+                        tension: 0,
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#e2e8f0',
+                            font: { family: 'Plus Jakarta Sans', size: 12 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                if (context.raw === null || context.raw === undefined) {
+                                    return context.dataset.label + ': No Entry';
+                                }
+                                return context.dataset.label + ': ' + context.raw + ' hrs';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: { color: '#94a3b8', font: { size: 11 } }
+                    },
+                    y: {
+                        min: 0,
+                        max: 14,
+                        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+                        ticks: {
+                            color: '#94a3b8',
+                            stepSize: 2,
+                            callback: function(val) { return val + 'h'; }
+                        }
+                    }
+                }
+            }
+        });
     }
+
+    // Button event listeners
+    const rangeButtons = document.querySelectorAll('.chart-range-btn');
+    rangeButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            rangeButtons.forEach(b => {
+                b.classList.remove('btn-starry', 'active');
+                b.classList.add('btn-starry-outline');
+            });
+            this.classList.remove('btn-starry-outline');
+            this.classList.add('btn-starry', 'active');
+            loadTrendData(this.getAttribute('data-days'));
+        });
+    });
+
+    // Initial load: 7 days
+    loadTrendData(7);
+});
 </script>
 {% endblock %}
