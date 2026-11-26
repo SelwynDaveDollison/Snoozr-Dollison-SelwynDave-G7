@@ -57,15 +57,18 @@ WSGI_APPLICATION = 'snoozr_project.wsgi.application'
 DB_ENGINE = os.getenv('DB_ENGINE', '')
 DB_NAME = os.getenv('DB_NAME', '')
 
-if DB_ENGINE == 'django.db.backends.postgresql' or (DB_NAME and DB_NAME != 'db.sqlite3' and os.getenv('DB_USER')):
+if DB_ENGINE == 'django.db.backends.postgresql' or os.getenv('DB_HOST') or (DB_NAME and DB_NAME != 'db.sqlite3' and os.getenv('DB_USER')):
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': DB_NAME,
+            'NAME': DB_NAME or 'postgres',
             'USER': os.getenv('DB_USER', 'postgres'),
             'PASSWORD': os.getenv('DB_PASSWORD', ''),
             'HOST': os.getenv('DB_HOST', 'localhost'),
             'PORT': os.getenv('DB_PORT', '5432'),
+            'OPTIONS': {
+                'sslmode': 'require',
+            },
         }
     }
 else:
