@@ -63,6 +63,27 @@
                     </div>
                     <div class="col-sm-6">
                         <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Timezone (BR-11, BR-17)</div>
+                            <div class="fw-bold text-white"><i class="bi bi-globe-asia-australia text-info me-1"></i>{{ profile.timezone|default:"Asia/Manila" }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="text-muted small text-uppercase fw-semibold">Nightly Sleep Goal</span>
+                                <a href="{% url 'sleep_tracking:goal' %}" class="small text-warning text-decoration-none">Change</a>
+                            </div>
+                            <div class="fw-bold text-gold-gradient"><i class="bi bi-bullseye me-1"></i>{{ current_goal_hours }} Hours</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
+                            <div class="text-muted small text-uppercase fw-semibold mb-1">Total Nights Logged</div>
+                            <div class="fw-bold text-white"><i class="bi bi-moon-stars text-cyan-gradient me-1"></i>{{ logs_count }} Night{{ logs_count|pluralize }}</div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="p-3 rounded-3" style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06);">
                             <div class="text-muted small text-uppercase fw-semibold mb-1">Cosmic Member Since</div>
                             <div class="fw-bold text-white">{{ user.date_joined|date:"F d, Y" }}</div>
                         </div>

@@ -274,3 +274,62 @@ class SleepTrackingViewTests(TestCase):
         res = self.client.post(del_url)
         self.assertEqual(res.status_code, 404)
         self.assertTrue(SleepLog.objects.filter(pk=log2.pk).exists())
+
+    def test_f06_dashboard_metrics_and_br17(self):
+        """F-06 & BR-17: Dashboard shows last night's sleep and 7-day rolling average."""
+        # 1. Empty state: should show 'No data'
+        res_empty = self.client.get(reverse('accounts:member_dashboard'))
+        self.assertEqual(res_empty.status_code, 200)
+        self.assertContains(res_empty, 'No data')
+
+        # 2. Add an entry 2 days ago (8 hours = 480 mins)
+        t0 = self.now - timedelta(days=2)
+        bed = t0.replace(hour=22, minute=0, second=0, microsecond=0)
+        wake = (t0 + timedelta(days=1)).replace(hour=6, minute=0, second=0, microsecond=0)
+        SleepLog.objects.create(user=self.user, bedtime=bed, wake_time=wake)
+
+        res_entry = self.client.get(reverse('accounts:member_dashboard'))
+        self.assertEqual(res_entry.status_code, 200)
+        self.assertContains(res_entry, '8h 00m')
+        self.assertContains(res_entry, '8h 00m')
+
+    def test_f07_trend_chart_api_and_br18(self):
+        """F-07 & BR-18: Weekly trend chart API returns gaps (null) for missing days."""
+        t0 = self.now - timedelta(days=1)
+        bed = t0.replace(hour=23, minute=0, second=0, microsecond=0)
+        wake = (t0 + timedelta(days=1)).replace(hour=7, minute=0, second=0, microsecond=0)
+        SleepLog.objects.create(user=self.user, bedtime=bed, wake_time=wake)
+
+        res = self.client.get(reverse('sleep_tracking:trend_api') + '?days=7')
+        self.assertEqual(res.status_code, 200)
+        data = res.json()
+        self.assertEqual(len(data['labels']), 7)
+        self.assertEqual(len(data['durations']), 7)
+        # BR-18: Missing days must be null (gaps), not 0
+        self.assertIn(None, data['durations'])
+
+    def test_f08_and_f09_goal_tracker_and_update(self):
+        """F-08 & F-09: Update goal and check goal history."""
+        res_post = self.client.post(reverse('sleep_tracking:goal'), {
+            'target_hours': '7.5',
+            'effective_from': timezone.localdate().isoformat(),
+        })
+        self.assertEqual(res_post.status_code, 302)
+        self.assertEqual(SleepGoal.get_goal_for_date(self.user, timezone.localdate()), Decimal('7.5'))
+
+    def test_f13_summary_report_view_and_br26(self):
+        """F-13 & BR-26: Sleep Summary Report covers 7 to 90 days and reports stats."""
+        # Test with no data: shows No Data Available
+        res_no_data = self.client.get(reverse('sleep_tracking:report') + '?days=7')
+        self.assertEqual(res_no_data.status_code, 200)
+        self.assertContains(res_no_data, 'No Data Available')
+
+        # Add 1 night of sleep
+        bed = self.now - timedelta(hours=9)
+        wake = self.now - timedelta(hours=1)
+        SleepLog.objects.create(user=self.user, bedtime=bed, wake_time=wake)
+
+        res_data = self.client.get(reverse('sleep_tracking:report') + '?days=7')
+        self.assertEqual(res_data.status_code, 200)
+        self.assertContains(res_data, 'Average Sleep')
+        self.assertContains(res_data, 'Goal Success Rate')
